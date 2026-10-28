@@ -1,0 +1,2518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HUE — Numerical Methods Lab ✦ Space Edition</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Share+Tech+Mono&family=Exo+2:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+:root {
+  --bg:      #01020a;
+  --bg2:     #05071a;
+  --card:    #080d22;
+  --card2:   #0c1230;
+  --border:  #1a2550;
+  --border2: #243570;
+  --gold:    #00d4ff;
+  --gold2:   #80eaff;
+  --purple:  #b06aff;
+  --teal:    #00ffcc;
+  --orange:  #ff6b35;
+  --red:     #ff3366;
+  --green:   #00ff88;
+  --text:    #e8f4ff;
+  --dim:     #1e2d55;
+  --dim2:    #4a7aaa;
+  --navy:    #030818;
+  --beige:   #00d4ff;
+  --beige2:  #80eaff;
+  --accent:  #b06aff;
+  --star1:   #ffffff;
+  --nebula1: #4a0080;
+  --nebula2: #001a4a;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+/* STARS BACKGROUND */
+@keyframes twinkle {
+  0%,100% { opacity: 0.2; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.3); }
+}
+
+body {
+  font-family: 'Exo 2', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* Starfield */
+body::after {
+  content: '';
+  position: fixed; inset: 0;
+  background-image:
+    radial-gradient(1px 1px at 10% 15%, rgba(255,255,255,0.9) 0%, transparent 100%),
+    radial-gradient(1px 1px at 25% 40%, rgba(200,220,255,0.7) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 40% 8%, rgba(255,255,255,0.8) 0%, transparent 100%),
+    radial-gradient(1px 1px at 55% 25%, rgba(180,210,255,0.6) 0%, transparent 100%),
+    radial-gradient(1px 1px at 70% 60%, rgba(255,255,255,0.9) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 80% 18%, rgba(200,230,255,0.7) 0%, transparent 100%),
+    radial-gradient(1px 1px at 90% 45%, rgba(255,255,255,0.8) 0%, transparent 100%),
+    radial-gradient(1px 1px at 15% 70%, rgba(180,210,255,0.6) 0%, transparent 100%),
+    radial-gradient(2px 2px at 35% 55%, rgba(255,255,255,0.5) 0%, transparent 100%),
+    radial-gradient(1px 1px at 60% 80%, rgba(200,220,255,0.7) 0%, transparent 100%),
+    radial-gradient(1px 1px at 75% 90%, rgba(255,255,255,0.9) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 5% 50%, rgba(200,220,255,0.6) 0%, transparent 100%),
+    radial-gradient(1px 1px at 48% 35%, rgba(255,255,255,0.8) 0%, transparent 100%),
+    radial-gradient(1px 1px at 92% 75%, rgba(180,210,255,0.7) 0%, transparent 100%),
+    radial-gradient(1px 1px at 20% 88%, rgba(255,255,255,0.5) 0%, transparent 100%),
+    radial-gradient(2px 2px at 67% 5%, rgba(200,230,255,0.8) 0%, transparent 100%),
+    radial-gradient(1px 1px at 82% 35%, rgba(255,255,255,0.6) 0%, transparent 100%),
+    radial-gradient(1px 1px at 30% 20%, rgba(180,210,255,0.9) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 50% 70%, rgba(255,255,255,0.7) 0%, transparent 100%),
+    radial-gradient(1px 1px at 95% 15%, rgba(200,220,255,0.8) 0%, transparent 100%);
+  pointer-events: none;
+  z-index: 0;
+  animation: twinkle-all 4s ease-in-out infinite alternate;
+}
+
+@keyframes twinkle-all {
+  0% { opacity: 0.6; }
+  100% { opacity: 1; }
+}
+
+/* ══════════════════════════════════════════
+   LOADING SCREEN
+══════════════════════════════════════════ */
+#loadingScreen {
+  position: fixed; inset: 0;
+  background: radial-gradient(ellipse at center, #05071a 0%, #01020a 70%);
+  z-index: 500;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+}
+
+.ls-corner {
+  position: absolute;
+  width: 22px; height: 22px;
+  border-color: var(--beige);
+  border-style: solid;
+  opacity: 0.8;
+  filter: drop-shadow(0 0 6px var(--beige));
+}
+.ls-corner.tl { top: 32px; left: 32px; border-width: 2px 0 0 2px; }
+.ls-corner.tr { top: 32px; right: 32px; border-width: 2px 2px 0 0; }
+.ls-corner.bl { bottom: 32px; left: 32px; border-width: 0 0 2px 2px; }
+.ls-corner.br { bottom: 32px; right: 32px; border-width: 0 2px 2px 0; }
+
+.ls-top-bar {
+  position: absolute;
+  top: 28px; left: 50%;
+  transform: translateX(-50%);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px; letter-spacing: 4px;
+  color: var(--dim2);
+  text-transform: uppercase;
+}
+
+.ls-bottom-bar {
+  position: absolute;
+  bottom: 28px; left: 50%;
+  transform: translateX(-50%);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px; letter-spacing: 3px;
+  color: var(--beige);
+  text-shadow: 0 0 10px var(--beige);
+}
+
+/* اللوجو الكبير في المنتصف */
+.ls-logo {
+  font-family: 'Orbitron', monospace;
+  font-size: 96px;
+  font-weight: 900;
+  color: var(--beige);
+  letter-spacing: 20px;
+  text-shadow:
+    0 0 20px var(--beige),
+    0 0 60px rgba(0,212,255,0.5),
+    0 0 120px rgba(0,212,255,0.3);
+  margin-bottom: 8px;
+  opacity: 0;
+  transform: scale(0.85);
+  transition: opacity 0.8s ease, transform 0.8s cubic-bezier(.22,1.2,.6,1);
+}
+.ls-logo.visible { opacity: 1; transform: scale(1); }
+
+.ls-tagline {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 6px;
+  color: var(--accent);
+  text-transform: uppercase;
+  margin-bottom: 60px;
+  opacity: 0;
+  transition: opacity 0.6s ease 0.3s;
+  text-shadow: 0 0 15px var(--accent);
+}
+.ls-tagline.visible { opacity: 1; }
+
+/* Progress container */
+.ls-progress-wrap {
+  width: 320px;
+  margin-bottom: 24px;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+.ls-progress-wrap.visible { opacity: 1; }
+
+.ls-progress-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.ls-progress-label {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: var(--dim2);
+}
+.ls-progress-pct {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px;
+  color: var(--beige);
+  text-shadow: 0 0 8px var(--beige);
+}
+
+.ls-progress-track {
+  width: 100%;
+  height: 2px;
+  background: var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+  position: relative;
+}
+.ls-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--beige));
+  border-radius: 2px;
+  width: 0%;
+  transition: width 0.3s ease;
+  position: relative;
+  box-shadow: 0 0 10px var(--beige), 0 0 20px rgba(0,212,255,0.5);
+}
+.ls-progress-fill::after {
+  content: '';
+  position: absolute;
+  right: 0; top: -3px;
+  width: 6px; height: 8px;
+  background: var(--beige2);
+  border-radius: 2px;
+  box-shadow: 0 0 12px var(--beige), 0 0 25px var(--beige), 0 0 40px rgba(0,212,255,0.8);
+}
+
+/* Log lines */
+.ls-log {
+  width: 320px;
+  height: 80px;
+  overflow: hidden;
+  margin-bottom: 0;
+  opacity: 0;
+  transition: opacity 0.5s ease 0.1s;
+}
+.ls-log.visible { opacity: 1; }
+.ls-log-line {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px;
+  color: var(--dim2);
+  letter-spacing: 1px;
+  line-height: 1.9;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.ls-log-line.show { opacity: 1; transform: translateY(0); }
+.ls-log-line .ok  { color: var(--green); text-shadow: 0 0 8px var(--green); }
+.ls-log-line .pending { color: var(--beige); animation: blink 0.7s infinite; text-shadow: 0 0 8px var(--beige); }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+/* fade out the whole loading screen */
+#loadingScreen.done {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.7s ease;
+}
+
+/* ══════════════════════════════════════════
+   INTRO PAGE
+══════════════════════════════════════════ */
+#introPage {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+  opacity: 0;
+  transition: opacity 0.8s ease;
+}
+#introPage.visible { opacity: 1; }
+
+#labPage { display: none; }
+
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background:
+    radial-gradient(ellipse 80% 60% at 20% 20%, rgba(176,106,255,0.12) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 80% at 80% 80%, rgba(0,212,255,0.08) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 50% at 50% 50%, rgba(0,26,74,0.4) 0%, transparent 70%),
+    radial-gradient(ellipse 100% 100% at 50% 50%, #01020a 40%, transparent 100%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Moving nebula glow */
+@keyframes nebulaPulse {
+  0%,100% { opacity: 0.6; transform: scale(1) rotate(0deg); }
+  50% { opacity: 1; transform: scale(1.05) rotate(1deg); }
+}
+
+.grid-bg {
+  position: fixed; inset: 0;
+  background-image:
+    linear-gradient(rgba(0,212,255,0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,212,255,0.08) 1px, transparent 1px);
+  background-size: 60px 60px;
+  opacity: 0.5;
+  z-index: 0;
+  mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 20%, transparent 80%);
+  animation: gridShimmer 8s ease-in-out infinite;
+}
+
+@keyframes gridShimmer {
+  0%,100% { opacity: 0.4; }
+  50% { opacity: 0.7; }
+}
+
+.math-float {
+  position: fixed;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 12px;
+  color: var(--beige);
+  opacity: 0;
+  animation: floatUp 8s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 0;
+  text-shadow: 0 0 12px var(--beige);
+}
+@keyframes floatUp {
+  0%   { opacity: 0; transform: translateY(20px); }
+  20%  { opacity: 0.5; }
+  80%  { opacity: 0.5; }
+  100% { opacity: 0; transform: translateY(-60px); }
+}
+
+.intro-container {
+  position: relative; z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.uni-badge {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 4px;
+  color: var(--dim2);
+  text-transform: uppercase;
+  margin-bottom: 40px;
+  opacity: 0;
+  animation: fadeInUp 0.8s ease 0.1s forwards;
+}
+
+.logo-wrapper {
+  position: relative;
+  margin-bottom: 32px;
+  opacity: 0;
+  animation: fadeInUp 0.9s cubic-bezier(.22,1.2,.6,1) 0.2s forwards;
+}
+
+.logo-box {
+  font-family: 'Orbitron', monospace;
+  font-size: 72px;
+  font-weight: 900;
+  color: var(--beige);
+  letter-spacing: 12px;
+  border: 2px solid var(--beige);
+  padding: 28px 52px;
+  position: relative;
+  border-radius: 20px;
+  text-shadow:
+    0 0 20px var(--beige),
+    0 0 60px rgba(0,212,255,0.6),
+    0 0 100px rgba(0,212,255,0.3);
+  box-shadow:
+    0 0 0 1px rgba(0,212,255,0.15),
+    inset 0 0 80px rgba(0,212,255,0.05),
+    0 0 60px rgba(0,212,255,0.2),
+    0 0 120px rgba(176,106,255,0.1);
+  background: rgba(0, 212, 255, 0.03);
+}
+
+/* Orbital ring decoration */
+.logo-box::before {
+  content: '';
+  position: absolute;
+  top: -12px; left: -12px; right: -12px; bottom: -12px;
+  border: 1px solid rgba(0,212,255,0.2);
+  border-radius: 28px;
+  animation: orbitPulse 3s ease-in-out infinite;
+}
+
+.logo-box::after {
+  content: '';
+  position: absolute;
+  top: -24px; left: -24px; right: -24px; bottom: -24px;
+  border: 1px solid rgba(176,106,255,0.1);
+  border-radius: 36px;
+  animation: orbitPulse 3s ease-in-out 1.5s infinite;
+}
+
+@keyframes orbitPulse {
+  0%,100% { opacity: 0.3; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(1.02); }
+}
+
+.logo-box .scanline {
+  position: absolute;
+  left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--beige), transparent);
+  opacity: 0;
+  animation: scan 3s ease-in-out 1.5s infinite;
+  box-shadow: 0 0 10px var(--beige);
+}
+@keyframes scan {
+  0%   { top: 0; opacity: 0; }
+  10%  { opacity: 0.8; }
+  90%  { opacity: 0.8; }
+  100% { top: 100%; opacity: 0; }
+}
+
+.title-block {
+  text-align: center;
+  margin-bottom: 12px;
+  opacity: 0;
+  animation: fadeInUp 0.8s ease 0.35s forwards;
+}
+.title-block h1 {
+  font-family: 'Exo 2', sans-serif;
+  font-size: 32px; font-weight: 700;
+  color: var(--text); letter-spacing: 6px; text-transform: uppercase;
+}
+.title-block h1 span { color: var(--beige); font-weight: 800; text-shadow: 0 0 20px var(--beige); }
+
+.subtitle {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px; letter-spacing: 3px;
+  color: var(--dim2); text-align: center;
+  margin-bottom: 40px;
+  opacity: 0;
+  animation: fadeInUp 0.8s ease 0.45s forwards;
+}
+
+.methods-row {
+  display: flex; gap: 8px; flex-wrap: wrap;
+  justify-content: center;
+  margin-bottom: 40px;
+  opacity: 0;
+  animation: fadeInUp 0.8s ease 0.55s forwards;
+}
+.method-pill {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px; letter-spacing: 1.5px;
+  padding: 6px 14px;
+  border: 1px solid var(--border2);
+  color: var(--dim2);
+  background: var(--card);
+  border-radius: 20px;
+  transition: all .3s;
+}
+.method-pill.highlight  { border-color: var(--beige); color: var(--beige); background: rgba(0,212,255,0.08); box-shadow: 0 0 12px rgba(0,212,255,0.2), inset 0 0 12px rgba(0,212,255,0.05); }
+.method-pill.highlight2 { border-color: var(--accent); color: var(--accent); background: rgba(176,106,255,0.08); box-shadow: 0 0 12px rgba(176,106,255,0.2); }
+
+.stat-row {
+  display: flex; gap: 32px;
+  margin-bottom: 36px;
+  opacity: 0;
+  animation: fadeInUp 0.8s ease 0.65s forwards;
+}
+.stat { text-align: center; }
+.stat-num { font-family: 'Orbitron', monospace; font-size: 22px; font-weight: 700; color: var(--gold); text-shadow: 0 0 15px var(--beige); }
+.stat-label { font-family: 'Share Tech Mono', monospace; font-size: 8px; letter-spacing: 2px; color: var(--dim2); margin-top: 2px; }
+.divider { width: 1px; background: var(--border2); align-self: stretch; }
+
+.enter-btn {
+  font-family: 'Orbitron', monospace;
+  font-size: 12px; font-weight: 700;
+  letter-spacing: 4px;
+  padding: 18px 60px;
+  background: transparent;
+  border: 1px solid var(--beige);
+  color: var(--beige);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  border-radius: 40px;
+  transition: all .3s;
+  opacity: 0;
+  animation: fadeInUp 0.8s ease 0.8s forwards;
+  box-shadow: 0 0 20px rgba(0,212,255,0.2), inset 0 0 20px rgba(0,212,255,0.05);
+}
+.enter-btn::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(0,212,255,0.15), rgba(176,106,255,0.1));
+  transform: translateX(-101%);
+  transition: transform .3s ease;
+  z-index: -1;
+  border-radius: 40px;
+}
+.enter-btn:hover {
+  color: #fff;
+  box-shadow: 0 0 40px rgba(0,212,255,0.5), 0 0 80px rgba(0,212,255,0.2), inset 0 0 40px rgba(0,212,255,0.1);
+  border-color: var(--beige2);
+  text-shadow: 0 0 15px var(--beige);
+}
+.enter-btn:hover::before { transform: translateX(0); }
+.enter-btn .arrow { display: inline-block; margin-left: 10px; transition: transform .3s; }
+.enter-btn:hover .arrow { transform: translateX(8px); }
+
+.version-tag {
+  position: fixed;
+  bottom: 28px; right: 32px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px; letter-spacing: 2px;
+  color: var(--dim2);
+  z-index: 1;
+  opacity: 0;
+  animation: fadeInUp 0.8s ease 1s forwards;
+}
+
+.intro-features {
+  display: flex; gap: 14px; flex-wrap: wrap;
+  justify-content: center;
+  margin-bottom: 32px;
+  opacity: 0;
+  animation: fadeInUp 0.8s ease 0.72s forwards;
+}
+.intro-feat-item {
+  display: flex; align-items: center; gap: 8px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px; color: var(--dim2);
+  background: var(--card);
+  border: 1px solid var(--border);
+  padding: 7px 14px;
+  border-radius: 20px;
+  transition: all .3s;
+  letter-spacing: 1px;
+}
+.intro-feat-item:hover { border-color: var(--beige); color: var(--beige); box-shadow: 0 0 12px rgba(0,212,255,0.2); }
+.feat-icon { font-size: 13px; }
+
+.intro-hint {
+  margin-top: 18px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px; color: var(--dim);
+  letter-spacing: 2px;
+  opacity: 0;
+  animation: fadeInUp 0.8s ease 0.9s forwards;
+}
+.intro-hint kbd {
+  background: var(--card);
+  border: 1px solid var(--border2);
+  padding: 2px 8px;
+  border-radius: 5px;
+  font-size: 9px;
+  color: var(--beige);
+  box-shadow: 0 0 8px rgba(0,212,255,0.2);
+}
+
+.page-transition {
+  position: fixed; inset: 0;
+  background: var(--bg);
+  z-index: 999;
+  transform: scaleY(0);
+  transform-origin: bottom;
+  pointer-events: none;
+}
+.page-transition.active {
+  animation: curtainUp 0.6s ease forwards;
+}
+@keyframes curtainUp {
+  0%   { transform: scaleY(0); transform-origin: bottom; }
+  50%  { transform: scaleY(1); transform-origin: bottom; }
+  50.1%{ transform: scaleY(1); transform-origin: top; }
+  100% { transform: scaleY(0); transform-origin: top; }
+}
+
+/* ══════════════════════════════════════════
+   LAB PAGE
+══════════════════════════════════════════ */
+.topbar {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(1,2,10,0.85);
+  backdrop-filter: blur(24px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 32px;
+  display: flex; align-items: center; gap: 20px;
+  height: 60px;
+  box-shadow: 0 1px 30px rgba(0,212,255,0.08);
+}
+.topbar-logo {
+  font-family: 'Orbitron', monospace;
+  font-size: 14px; font-weight: 900;
+  color: var(--beige); letter-spacing: 3px;
+  border: 1px solid var(--beige);
+  padding: 6px 16px;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all .2s;
+  text-shadow: 0 0 12px var(--beige);
+  box-shadow: 0 0 15px rgba(0,212,255,0.15), inset 0 0 15px rgba(0,212,255,0.05);
+}
+.topbar-logo:hover { background: rgba(0,212,255,0.1); box-shadow: 0 0 25px rgba(0,212,255,0.4); }
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all .2s;
+}
+.topbar-title { flex: 1; }
+.topbar-title h1 { font-family: 'Exo 2', sans-serif; font-size: 16px; font-weight: 700; color: var(--text); letter-spacing: 2px; text-transform: uppercase; }
+.topbar-title p  { font-size: 9px; color: var(--dim2); font-family: 'Share Tech Mono', monospace; letter-spacing: 1px; }
+.topbar-actions { display: flex; gap: 8px; }
+.btn-top {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px; font-weight: 500;
+  padding: 7px 16px;
+  border: 1px solid var(--border2);
+  background: transparent; color: var(--dim2);
+  cursor: pointer; letter-spacing: 2px;
+  border-radius: 8px;
+  transition: all .2s;
+}
+.btn-top:hover { border-color: var(--beige); color: var(--beige); box-shadow: 0 0 12px rgba(0,212,255,0.2); }
+
+.layout {
+  position: relative; z-index: 1;
+  display: grid;
+  grid-template-columns: 440px 1fr;
+  gap: 0;
+  height: calc(100vh - 60px);
+}
+
+.left-panel {
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+  padding: 24px 20px;
+  display: flex; flex-direction: column; gap: 16px;
+}
+.left-panel::-webkit-scrollbar { width: 4px; }
+.left-panel::-webkit-scrollbar-track { background: transparent; }
+.left-panel::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+.card { background: var(--card); border: 1px solid var(--border); padding: 16px; border-radius: 12px; box-shadow: inset 0 0 30px rgba(0,212,255,0.02); }
+.card-label { font-family: 'Share Tech Mono', monospace; font-size: 9px; letter-spacing: 3px; color: var(--beige); margin-bottom: 12px; text-shadow: 0 0 8px rgba(0,212,255,0.5); opacity: 0.8; }
+
+.method-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.method-btn {
+  padding: 10px 8px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  color: var(--dim2);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px; letter-spacing: 1px;
+  cursor: pointer; transition: all .25s;
+  text-align: left;
+  border-radius: 8px;
+  display: flex; align-items: center; gap: 8px;
+}
+.method-btn .icon { font-size: 14px; }
+.method-btn:hover { border-color: var(--border2); color: var(--text); background: rgba(0,212,255,0.05); }
+.method-btn.active {
+  border-color: var(--method-color, var(--beige));
+  color: var(--method-color, var(--beige));
+  background: color-mix(in srgb, var(--method-color, var(--beige)) 10%, transparent);
+  box-shadow: 0 0 15px color-mix(in srgb, var(--method-color, var(--beige)) 30%, transparent), inset 0 0 15px color-mix(in srgb, var(--method-color, var(--beige)) 5%, transparent);
+  text-shadow: 0 0 8px var(--method-color, var(--beige));
+}
+.method-hint {
+  margin-top: 10px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px; color: var(--dim2);
+  padding: 8px 12px; background: var(--bg2);
+  border-left: 2px solid var(--method-color-val, var(--beige));
+  border-radius: 0 8px 8px 0;
+  letter-spacing: 1px;
+  box-shadow: -4px 0 15px color-mix(in srgb, var(--method-color-val, var(--beige)) 20%, transparent);
+}
+
+.input-group { margin-bottom: 12px; }
+.input-label {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px; color: var(--dim2);
+  letter-spacing: 1px; margin-bottom: 5px; display: block;
+}
+.input-field {
+  width: 100%;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  color: var(--teal);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11px; padding: 8px 12px;
+  outline: none; transition: border-color .2s, box-shadow .2s;
+  border-radius: 8px;
+  text-shadow: 0 0 8px var(--teal);
+}
+.input-field:focus { border-color: var(--method-color-val, var(--beige)); box-shadow: 0 0 15px color-mix(in srgb, var(--method-color-val, var(--beige)) 30%, transparent); }
+.input-field.normal { color: var(--text); text-shadow: none; }
+
+.snippets { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; }
+.snippet-btn {
+  font-family: 'Share Tech Mono', monospace; font-size: 9px;
+  padding: 3px 9px; background: var(--bg2);
+  border: 1px solid var(--border); color: var(--beige);
+  cursor: pointer; transition: all .2s;
+  border-radius: 6px;
+}
+.snippet-btn:hover { border-color: var(--beige); color: var(--beige2); box-shadow: 0 0 10px rgba(0,212,255,0.3); text-shadow: 0 0 8px var(--beige); }
+
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+
+.btn-calc {
+  width: 100%; padding: 14px;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--method-color-val, var(--beige)) 90%, transparent), color-mix(in srgb, var(--method-color-val, var(--beige)) 70%, var(--accent)));
+  border: none; color: #000;
+  font-family: 'Orbitron', monospace;
+  font-size: 12px; font-weight: 700;
+  letter-spacing: 3px; cursor: pointer;
+  transition: all .3s; text-transform: uppercase;
+  border-radius: 10px;
+  box-shadow: 0 4px 25px color-mix(in srgb, var(--method-color-val, var(--beige)) 40%, transparent);
+}
+.btn-calc:hover { filter: brightness(1.15); box-shadow: 0 6px 35px color-mix(in srgb, var(--method-color-val, var(--beige)) 60%, transparent), 0 0 60px color-mix(in srgb, var(--method-color-val, var(--beige)) 20%, transparent); transform: translateY(-1px); }
+.btn-calc:active { transform: scale(0.98); }
+
+.btn-row { display: flex; gap: 8px; margin-top: 8px; }
+.btn-sm {
+  flex: 1; padding: 8px;
+  background: transparent;
+  border: 1px solid var(--border2);
+  color: var(--dim2);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px; letter-spacing: 1px;
+  cursor: pointer; transition: all .2s;
+  border-radius: 8px;
+}
+.btn-sm:hover { border-color: var(--text); color: var(--text); box-shadow: 0 0 10px rgba(0,212,255,0.15); }
+.btn-sm.compare { border-color: var(--beige); color: var(--beige); }
+.btn-sm.compare:hover { background: rgba(0,212,255,0.1); box-shadow: 0 0 15px rgba(0,212,255,0.3); }
+
+.table-wrap { overflow-x: auto; max-height: 240px; overflow-y: auto; }
+.table-wrap::-webkit-scrollbar { width: 3px; height: 3px; }
+.table-wrap::-webkit-scrollbar-thumb { background: var(--border2); }
+
+table { width: 100%; border-collapse: collapse; font-family: 'Share Tech Mono', monospace; font-size: 10px; }
+thead th {
+  padding: 7px 10px; background: var(--bg2);
+  border-bottom: 1px solid var(--border2);
+  color: var(--beige); text-align: center;
+  letter-spacing: 1px; font-size: 9px;
+  position: sticky; top: 0;
+  text-shadow: 0 0 8px rgba(0,212,255,0.5);
+}
+tbody tr { border-bottom: 1px solid var(--border); transition: background .15s; }
+tbody tr:hover { background: rgba(0,212,255,0.05); }
+tbody tr.last-row { background: rgba(0,255,136,0.05); }
+tbody td { padding: 7px 10px; text-align: center; color: var(--text); }
+tbody tr.last-row td { color: var(--green); text-shadow: 0 0 8px var(--green); }
+
+.status-bar { font-family: 'Share Tech Mono', monospace; font-size: 9px; color: var(--dim2); padding: 6px 0; letter-spacing: 1px; }
+.status-bar.success  { color: var(--green); text-shadow: 0 0 8px var(--green); }
+.status-bar.error-msg { color: var(--red); text-shadow: 0 0 8px var(--red); }
+
+.right-panel { display: flex; flex-direction: column; overflow: hidden; height: 100%; }
+
+.tabs { display: flex; border-bottom: 1px solid var(--border); background: var(--card); flex-shrink: 0; }
+.tab {
+  padding: 14px 20px;
+  font-family: 'Share Tech Mono', monospace; font-size: 9px; letter-spacing: 2px;
+  color: var(--dim2); cursor: pointer;
+  border-bottom: 2px solid transparent; transition: all .2s;
+}
+.tab:hover { color: var(--text); }
+.tab.active { color: var(--beige); border-bottom-color: var(--beige); text-shadow: 0 0 10px var(--beige); }
+
+.tab-content { display: none; flex: 1; overflow: hidden; min-height: 0; }
+.tab-content.active { display: flex; flex-direction: column; }
+
+.charts-area {
+  flex: 1; display: grid; grid-template-rows: 1fr 1fr;
+  gap: 8px; background: transparent; overflow: hidden; padding: 8px;
+  min-height: 0;
+}
+.chart-box { background: var(--bg2); padding: 16px; position: relative; overflow: hidden; border-radius: 12px; border: 1px solid var(--border); box-shadow: inset 0 0 30px rgba(0,212,255,0.02); display: flex; flex-direction: column; min-height: 0; }
+.chart-title { font-family: 'Share Tech Mono', monospace; font-size: 9px; letter-spacing: 2px; color: var(--beige); margin-bottom: 10px; text-shadow: 0 0 8px rgba(0,212,255,0.5); opacity: 0.8; flex-shrink: 0; }
+.chart-box canvas { width: 100% !important; height: 100% !important; flex: 1; min-height: 0; }
+
+.history-area { flex: 1; overflow-y: auto; padding: 20px; }
+.history-area::-webkit-scrollbar { width: 4px; }
+.history-area::-webkit-scrollbar-thumb { background: var(--border2); }
+
+.history-empty { text-align: center; padding: 60px; font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--dim); letter-spacing: 2px; }
+.hist-item {
+  background: var(--card); border: 1px solid var(--border);
+  padding: 14px 16px; margin-bottom: 8px;
+  cursor: pointer; transition: all .2s;
+  display: flex; align-items: center; gap: 16px;
+  border-radius: 10px;
+}
+.hist-item:hover { border-color: var(--border2); background: var(--card2); box-shadow: 0 0 15px rgba(0,212,255,0.1); }
+.hist-badge { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+.hist-info { flex: 1; }
+.hist-method { font-family: 'Share Tech Mono', monospace; font-size: 10px; font-weight: 700; margin-bottom: 3px; letter-spacing: 1px; }
+.hist-detail { font-family: 'Share Tech Mono', monospace; font-size: 9px; color: var(--dim2); }
+.hist-time   { font-family: 'Share Tech Mono', monospace; font-size: 9px; color: var(--dim); }
+
+.compare-area { flex: 1; overflow-y: auto; padding: 20px; }
+.compare-chart-wrap { background: var(--card); border: 1px solid var(--border); padding: 20px; margin-bottom: 16px; height: 280px; border-radius: 12px; }
+.compare-table-wrap { overflow-x: auto; }
+
+.info-area { flex: 1; overflow-y: auto; padding: 24px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-content: start; }
+.info-card { background: var(--card); border: 1px solid var(--border); padding: 16px; transition: border-color .2s, box-shadow .2s; border-radius: 12px; }
+.info-card:hover { border-color: var(--border2); box-shadow: 0 0 20px rgba(0,212,255,0.1); }
+.info-icon { font-size: 20px; margin-bottom: 8px; }
+.info-name { font-size: 13px; font-weight: 700; margin-bottom: 4px; font-family: 'Exo 2', sans-serif; letter-spacing: 1px; }
+.info-type { font-family: 'Share Tech Mono', monospace; font-size: 9px; color: var(--dim2); margin-bottom: 10px; letter-spacing: 1px; }
+.info-badge { display: inline-block; font-family: 'Share Tech Mono', monospace; font-size: 8px; padding: 2px 8px; margin-bottom: 8px; letter-spacing: 1px; border-radius: 4px; }
+.info-row { display: flex; justify-content: space-between; font-family: 'Share Tech Mono', monospace; font-size: 9px; padding: 4px 0; border-bottom: 1px solid var(--border); color: var(--dim2); }
+.info-row span:last-child { color: var(--beige); text-shadow: 0 0 8px rgba(0,212,255,0.4); }
+
+.thomas-grid { display: grid; gap: 6px; }
+textarea.input-field { resize: vertical; min-height: 70px; line-height: 1.6; }
+
+.result-box {
+  background: var(--bg2); border: 1px solid var(--border);
+  padding: 10px 14px; font-family: 'Share Tech Mono', monospace;
+  font-size: 10px; margin-top: 10px; display: none;
+  border-radius: 10px;
+  box-shadow: 0 0 20px rgba(0,212,255,0.1), inset 0 0 20px rgba(0,212,255,0.03);
+}
+.result-box.show { display: block; animation: popIn 0.4s cubic-bezier(.22,1.4,.6,1) both; }
+.result-box .r-label { color: var(--dim2); font-size: 9px; letter-spacing: 1px; }
+.result-box .r-val   { color: var(--beige); font-size: 14px; font-weight: 700; text-shadow: 0 0 15px var(--beige); letter-spacing: 2px; }
+
+.error-box {
+  background: rgba(255,51,102,0.05); border: 1px solid var(--red);
+  padding: 10px 14px; font-family: 'Share Tech Mono', monospace;
+  font-size: 10px; color: var(--red);
+  margin-top: 10px; display: none;
+  border-radius: 10px;
+  box-shadow: 0 0 15px rgba(255,51,102,0.2);
+}
+.error-box.show { display: block; }
+
+@keyframes fadeIn  { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+@keyframes pulse   { 0%,100% { opacity:1; } 50% { opacity:.5; } }
+@keyframes popIn   { 0% { opacity:0; transform:scale(0.88) translateY(8px); } 70% { transform:scale(1.04); } 100% { opacity:1; transform:scale(1) translateY(0); } }
+@keyframes slideInUp { from { opacity:0; transform:translateY(22px); } to { opacity:1; transform:translateY(0); } }
+
+.calculating { animation: pulse .8s infinite; }
+.fade-in     { animation: fadeIn .3s ease both; }
+
+/* AURORA BACKGROUND */
+.aurora-bg {
+  position: fixed; inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 120% 40% at 50% -10%, rgba(176,106,255,0.07) 0%, transparent 60%),
+    radial-gradient(ellipse 80% 30% at 10% 100%, rgba(0,212,255,0.05) 0%, transparent 50%),
+    radial-gradient(ellipse 60% 20% at 90% 110%, rgba(0,255,200,0.04) 0%, transparent 50%);
+  animation: auroraPulse 12s ease-in-out infinite alternate;
+}
+
+@keyframes auroraPulse {
+  0% { opacity: 0.5; transform: scaleX(1); }
+  50% { opacity: 1; transform: scaleX(1.05); }
+  100% { opacity: 0.7; transform: scaleX(0.98); }
+}
+
+/* SHOOTING STARS */
+#shootingStars {
+  position: fixed; inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+.shooting-star {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background: white;
+  border-radius: 50%;
+  animation: shoot linear forwards;
+}
+.shooting-star::after {
+  content: '';
+  position: absolute;
+  top: 0; right: 2px;
+  width: 80px; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.8), transparent);
+  transform: translateX(100%) scaleX(-1);
+  border-radius: 2px;
+}
+
+@keyframes shoot {
+  0% { opacity: 0; transform: translate(0, 0) rotate(var(--angle)); }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { opacity: 0; transform: translate(var(--tx), var(--ty)) rotate(var(--angle)); }
+}
+
+/* Planet decoration on loading screen */
+.ls-planet {
+  position: absolute;
+  border-radius: 50%;
+  animation: planetFloat 8s ease-in-out infinite;
+}
+.ls-planet.p1 {
+  width: 80px; height: 80px;
+  background: radial-gradient(circle at 30% 30%, #4a2080, #1a0040);
+  box-shadow: 0 0 30px rgba(176,106,255,0.3), 0 0 60px rgba(176,106,255,0.1);
+  top: 15%; left: 8%;
+  animation-delay: 0s;
+}
+.ls-planet.p2 {
+  width: 40px; height: 40px;
+  background: radial-gradient(circle at 30% 30%, #002a50, #001020);
+  box-shadow: 0 0 20px rgba(0,212,255,0.3), 0 0 40px rgba(0,212,255,0.1);
+  top: 20%; right: 10%;
+  animation-delay: 3s;
+}
+.ls-planet.p3 {
+  width: 24px; height: 24px;
+  background: radial-gradient(circle at 30% 30%, #203050, #0a1020);
+  box-shadow: 0 0 12px rgba(0,212,255,0.2);
+  bottom: 20%; left: 12%;
+  animation-delay: 5s;
+}
+@keyframes planetFloat {
+  0%,100% { transform: translateY(0px); }
+  50% { transform: translateY(-12px); }
+}
+
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<!-- SHOOTING STARS -->
+<div id="shootingStars"></div>
+<div class="aurora-bg"></div>
+
+<!-- ══════════════ LOADING SCREEN ══════════════ -->
+<div id="loadingScreen">
+  <div class="ls-corner tl"></div>
+  <div class="ls-corner tr"></div>
+  <div class="ls-corner bl"></div>
+  <div class="ls-corner br"></div>
+  <div class="ls-planet p1"></div>
+  <div class="ls-planet p2"></div>
+  <div class="ls-planet p3"></div>
+
+  <div class="ls-top-bar">Horus University Egypt &nbsp;·&nbsp; Faculty of Artificial Intelligence</div>
+  <div class="ls-bottom-bar" id="lsBottomBar">INITIALIZING</div>
+
+  <div class="ls-logo" id="lsLogo">HUE</div>
+  <div class="ls-tagline" id="lsTagline">Numerical Methods Lab</div>
+
+  <div class="ls-progress-wrap" id="lsProgressWrap">
+    <div class="ls-progress-header">
+      <span class="ls-progress-label" id="lsProgressLabel">LOADING MODULES</span>
+      <span class="ls-progress-pct" id="lsProgressPct">0%</span>
+    </div>
+    <div class="ls-progress-track">
+      <div class="ls-progress-fill" id="lsProgressFill"></div>
+    </div>
+  </div>
+
+  <div class="ls-log" id="lsLog"></div>
+</div>
+
+<!-- ══════════════ INTRO PAGE ══════════════ -->
+<div id="introPage">
+  <div class="grid-bg"></div>
+  <div class="page-transition" id="transition"></div>
+
+  <div class="intro-container">
+    <div class="uni-badge">Horus University Egypt &nbsp;·&nbsp; Faculty of Artificial Intelligence</div>
+
+    <div class="logo-wrapper">
+      <div class="logo-box">
+        HUE
+        <div class="scanline"></div>
+      </div>
+    </div>
+
+    <div class="title-block">
+      <h1>Numerical <span>Methods</span> Lab</h1>
+    </div>
+
+    <div class="subtitle">ROOT-FINDING &nbsp;·&nbsp; LINEAR SYSTEMS &nbsp;·&nbsp; INTERACTIVE VISUALIZATION</div>
+
+    <div class="methods-row">
+      <span class="method-pill highlight">BISECTION</span>
+      <span class="method-pill highlight">FALSE POSITION</span>
+      <span class="method-pill highlight2">NEWTON-RAPHSON</span>
+      <span class="method-pill highlight2">SECANT</span>
+      <span class="method-pill">THOMAS ALGORITHM</span>
+      <span class="method-pill">JACOBI ITERATION</span>
+    </div>
+
+    <div class="stat-row">
+      <div class="stat">
+        <div class="stat-num">6</div>
+        <div class="stat-label">METHODS</div>
+      </div>
+      <div class="divider"></div>
+      <div class="stat">
+        <div class="stat-num">∞</div>
+        <div class="stat-label">ITERATIONS</div>
+      </div>
+      <div class="divider"></div>
+      <div class="stat">
+        <div class="stat-num">10⁻⁶</div>
+        <div class="stat-label">TOLERANCE</div>
+      </div>
+      <div class="divider"></div>
+      <div class="stat">
+        <div class="stat-num">AI</div>
+        <div class="stat-label">FACULTY</div>
+      </div>
+    </div>
+
+    <div class="intro-features">
+      <div class="intro-feat-item">
+        <span class="feat-icon">📊</span>
+        <span>Live Chart Animation</span>
+      </div>
+      <div class="intro-feat-item">
+        <span class="feat-icon">⚖</span>
+        <span>Method Comparison</span>
+      </div>
+      <div class="intro-feat-item">
+        <span class="feat-icon">📜</span>
+        <span>Iteration History</span>
+      </div>
+      <div class="intro-feat-item">
+        <span class="feat-icon">💾</span>
+        <span>Export Results</span>
+      </div>
+    </div>
+
+    <button class="enter-btn" id="enterBtn" onclick="goToLab()">
+      ENTER LAB <span class="arrow">→</span>
+    </button>
+
+    <div class="intro-hint">press <kbd>Enter</kbd> to begin</div>
+  </div>
+
+  <div class="version-tag">v2.0 &nbsp;·&nbsp; HUE NUM LAB</div>
+</div>
+
+<!-- ══════════════ LAB PAGE ══════════════ -->
+<div id="labPage">
+  <div class="topbar">
+    <div class="topbar-logo" onclick="goToIntro()" title="Back to intro">HUE</div>
+    <div class="topbar-title">
+      <h1>Numerical Methods Lab</h1>
+      <p>ROOT-FINDING &amp; LINEAR SYSTEMS &nbsp;·&nbsp; 6 METHODS &nbsp;·&nbsp; HORUS UNIVERSITY — FACULTY OF AI</p>
+    </div>
+    <div class="topbar-actions">
+      <button class="btn-top" onclick="saveHistory()">💾 SAVE</button>
+      <button class="btn-top" onclick="clearHistoryData()">🗑 CLEAR</button>
+    </div>
+  </div>
+
+  <div class="layout">
+    <!-- LEFT PANEL -->
+    <div class="left-panel">
+
+      <div class="card">
+        <div class="card-label">SELECT METHOD</div>
+        <div class="method-grid" id="methodGrid"></div>
+        <div class="method-hint" id="methodHint"></div>
+      </div>
+
+      <div class="card" id="eqCard">
+        <div class="card-label">EQUATION  f(x) = 0</div>
+        <div class="input-group">
+          <input class="input-field" id="equation" value="x**3 - 2*x - 5" placeholder="e.g. x**3 - 2*x - 5">
+          <div class="snippets" id="snippets"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-label">PARAMETERS</div>
+        <div id="paramsArea"></div>
+
+        <div class="row3" style="margin-top:12px">
+          <div class="input-group">
+            <label class="input-label">TOLERANCE</label>
+            <input class="input-field normal" id="tol" value="1e-6">
+          </div>
+          <div class="input-group">
+            <label class="input-label">MAX ITER</label>
+            <input class="input-field normal" id="maxiter" value="100">
+          </div>
+          <div class="input-group">
+            <label class="input-label">DECIMALS</label>
+            <input class="input-field normal" id="decimals" value="6">
+          </div>
+        </div>
+
+        <button class="btn-calc" id="calcBtn" onclick="calculate()">▶ CALCULATE</button>
+        <div class="btn-row">
+          <button class="btn-sm" onclick="clearAll()">↺ CLEAR</button>
+          <button class="btn-sm compare" onclick="addToCompare()">⚖ ADD TO COMPARE</button>
+        </div>
+
+        <!-- STEP BY STEP -->
+        <div class="btn-row" style="margin-top:6px">
+          <button class="btn-sm" id="stepBtn" onclick="calculateStepByStep()" style="border-color:#00ffcc;color:#00ffcc;flex:1">⏭ STEP-BY-STEP</button>
+        </div>
+        <div id="stepControls" style="display:none;margin-top:8px">
+          <div style="display:flex;gap:6px;align-items:center">
+            <button class="btn-sm" onclick="stepPrev()" style="flex:0;padding:6px 12px;font-size:14px">◀</button>
+            <div id="stepCounter" style="flex:1;text-align:center;font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--beige);letter-spacing:1px">STEP 0 / 0</div>
+            <button class="btn-sm" onclick="stepNext()" style="flex:0;padding:6px 12px;font-size:14px">▶</button>
+          </div>
+          <div id="stepExplain" style="margin-top:8px;background:var(--bg2);border:1px solid var(--border);border-left:3px solid #00ffcc;padding:10px 12px;border-radius:0 8px 8px 0;font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--dim2);line-height:1.8;letter-spacing:0.5px"></div>
+        </div>
+
+
+        <div class="error-box" id="errorBox"></div>
+        <div class="result-box" id="resultBox"></div>
+      </div>
+
+      <div class="card" style="flex:1">
+        <div class="card-label">ITERATIONS</div>
+        <div class="table-wrap">
+          <table id="iterTable">
+            <thead id="tableHead"></thead>
+            <tbody id="tableBody"></tbody>
+          </table>
+        </div>
+        <div class="status-bar" id="statusBar">Ready</div>
+      </div>
+    </div>
+
+    <!-- RIGHT PANEL -->
+    <div class="right-panel">
+      <div class="tabs">
+        <div class="tab active" onclick="switchTab('chart')">📈 CHART</div>
+        <div class="tab" onclick="switchTab('history')">📜 HISTORY</div>
+        <div class="tab" onclick="switchTab('compare')">⚖ COMPARE</div>
+        <div class="tab" onclick="switchTab('info')">ℹ INFO</div>
+      </div>
+
+      <div class="tab-content active" id="tab-chart">
+        <div class="charts-area">
+          <div class="chart-box">
+            <div class="chart-title" id="chart1Title">FUNCTION  f(x)</div>
+            <canvas id="chart1"></canvas>
+          </div>
+          <div class="chart-box">
+            <div class="chart-title" id="chart2Title">CONVERGENCE</div>
+            <canvas id="chart2"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-content" id="tab-history">
+        <div style="display:flex;justify-content:flex-end;padding:12px 20px 0;gap:8px">
+          <button class="btn-sm" style="flex:0;padding:6px 14px" onclick="saveHistory()">💾 EXPORT JSON</button>
+          <button class="btn-sm" style="flex:0;padding:6px 14px" onclick="clearHistoryData()">🗑 CLEAR</button>
+        </div>
+        <div class="history-area" id="historyArea">
+          <div class="history-empty">No calculations yet.<br>Run a method to see history here.</div>
+        </div>
+      </div>
+
+      <div class="tab-content" id="tab-compare">
+        <div class="compare-area">
+          <div class="compare-chart-wrap">
+            <div class="chart-title">CONVERGENCE COMPARISON</div>
+            <canvas id="compareChart" height="220"></canvas>
+          </div>
+          <div class="compare-table-wrap">
+            <table id="compareTable">
+              <thead>
+                <tr><th>Method</th><th>Root</th><th>Iterations</th><th>Final Error</th></tr>
+              </thead>
+              <tbody id="compareBody">
+                <tr><td colspan="4" style="color:var(--dim);padding:20px;text-align:center;font-family:'Share Tech Mono',monospace;font-size:10px">Add methods using ⚖ ADD TO COMPARE</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div style="margin-top:12px">
+            <button class="btn-sm" style="width:auto;padding:8px 20px" onclick="runCompare()">▶ RUN COMPARISON CHART</button>
+            <button class="btn-sm" style="width:auto;padding:8px 20px;margin-left:8px" onclick="clearCompare()">✕ CLEAR</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-content" id="tab-info">
+        <div class="info-area" id="infoArea"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ SCRIPTS ══════════════ -->
+<script>
+/* ══════════════════════════════════════════════════════════════════════════
+   LOADING SCREEN SEQUENCE
+══════════════════════════════════════════════════════════════════════════ */
+(function() {
+  const steps = [
+    { label: 'BOOT',         msg: 'Initializing runtime environment',   pct: 8  },
+    { label: 'MATH ENGINE',  msg: 'Loading numerical solver core',       pct: 22 },
+    { label: 'METHODS',      msg: 'Registering root-finding algorithms', pct: 38 },
+    { label: 'RENDERER',     msg: 'Mounting chart visualization engine', pct: 54 },
+    { label: 'LINEAR SYS',   msg: 'Compiling Thomas & Jacobi modules',   pct: 68 },
+    { label: 'PARSER',       msg: 'Initializing f(x) expression parser', pct: 80 },
+    { label: 'UI LAYER',     msg: 'Building interface components',       pct: 92 },
+    { label: 'READY',        msg: 'All systems nominal',                 pct: 100 },
+  ];
+
+  const logo       = document.getElementById('lsLogo');
+  const tagline    = document.getElementById('lsTagline');
+  const progressWrap = document.getElementById('lsProgressWrap');
+  const logEl      = document.getElementById('lsLog');
+  const fill       = document.getElementById('lsProgressFill');
+  const pctEl      = document.getElementById('lsProgressPct');
+  const labelEl    = document.getElementById('lsProgressLabel');
+  const bottomBar  = document.getElementById('lsBottomBar');
+  const screen     = document.getElementById('loadingScreen');
+  const introPage  = document.getElementById('introPage');
+
+  let currentStep = 0;
+
+  // فور ما الصفحة تفتح — ظهور اللوجو
+  setTimeout(() => {
+    logo.classList.add('visible');
+    tagline.classList.add('visible');
+  }, 200);
+
+  // بعد ثانية — ابدأ الـ progress
+  setTimeout(() => {
+    progressWrap.classList.add('visible');
+    logEl.classList.add('visible');
+    runStep();
+  }, 1000);
+
+  function addLogLine(label, msg, status) {
+    const line = document.createElement('div');
+    line.className = 'ls-log-line';
+    if (status === 'ok') {
+      line.innerHTML = `<span class="ok">✓</span>  [${label}]  ${msg}`;
+    } else {
+      line.innerHTML = `<span class="pending">▸</span>  [${label}]  ${msg}`;
+    }
+    logEl.appendChild(line);
+    // scroll down
+    logEl.scrollTop = logEl.scrollHeight;
+    // animate in
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => line.classList.add('show'));
+    });
+    return line;
+  }
+
+  function animatePct(from, to, duration, cb) {
+    const start = performance.now();
+    function tick(now) {
+      const t = Math.min((now - start) / duration, 1);
+      const ease = 1 - Math.pow(1 - t, 3);
+      const val = Math.round(from + (to - from) * ease);
+      fill.style.width = val + '%';
+      pctEl.textContent = val + '%';
+      if (t < 1) requestAnimationFrame(tick);
+      else cb && cb();
+    }
+    requestAnimationFrame(tick);
+  }
+
+  function runStep() {
+    if (currentStep >= steps.length) return;
+    const step = steps[currentStep];
+    const prevPct = currentStep === 0 ? 0 : steps[currentStep - 1].pct;
+
+    labelEl.textContent = step.label;
+    bottomBar.textContent = step.label;
+
+    const line = addLogLine(step.label, step.msg, 'pending');
+
+    const delay = currentStep === 0 ? 180 : 260 + Math.random() * 180;
+
+    animatePct(prevPct, step.pct, delay * 0.9, () => {
+      // mark ok
+      line.innerHTML = `<span class="ok">✓</span>  [${step.label}]  ${step.msg}`;
+      currentStep++;
+
+      if (currentStep < steps.length) {
+        setTimeout(runStep, 80 + Math.random() * 100);
+      } else {
+        // تم — اخفي الـ loading وظهر الـ intro
+        setTimeout(finishLoading, 500);
+      }
+    });
+  }
+
+  function finishLoading() {
+    bottomBar.textContent = 'READY';
+    setTimeout(() => {
+      screen.classList.add('done');
+      setTimeout(() => {
+        screen.style.display = 'none';
+        introPage.classList.add('visible');
+      }, 750);
+    }, 400);
+  }
+})();
+
+/* ── FLOATING MATH SYMBOLS (intro) ────────────────────────────────────────── */
+const symbols = ['∫','∂','Σ','√','∞','π','∇','λ','δ','f(x)','x²','∀','∃','lim','→','≈'];
+for (let i = 0; i < 18; i++) {
+  const el = document.createElement('div');
+  el.className = 'math-float';
+  el.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+  el.style.left = Math.random() * 100 + 'vw';
+  el.style.top  = (30 + Math.random() * 60) + 'vh';
+  el.style.animationDelay    = (Math.random() * 6) + 's';
+  el.style.animationDuration = (6 + Math.random() * 4) + 's';
+  document.getElementById('introPage').appendChild(el);
+}
+
+/* ── PAGE NAVIGATION ──────────────────────────────────────────────────────── */
+function goToLab() {
+  const t = document.getElementById('transition');
+  t.classList.add('active');
+  setTimeout(() => {
+    document.getElementById('introPage').style.display = 'none';
+    document.getElementById('labPage').style.display = 'block';
+    t.classList.remove('active');
+    if (!labInited) { initLab(); labInited = true; }
+  }, 500);
+}
+
+function goToIntro() {
+  document.getElementById('labPage').style.display = 'none';
+  document.getElementById('introPage').style.display = 'flex';
+}
+
+let labInited = false;
+
+// Enter on keypress from intro
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && document.getElementById('introPage').style.display !== 'none') {
+    goToLab();
+  }
+});
+
+/* ══════════════════════════════════════════════════════════════════════════
+   MATH ENGINE  (pure JavaScript — no server needed)
+══════════════════════════════════════════════════════════════════════════ */
+
+/* safe eval for f(x) expressions */
+function evalF(expr, x) {
+  try {
+    const fn = new Function('x','sin','cos','tan','exp','log','log10','sqrt','pi','e','abs',
+      `"use strict"; return (${expr});`);
+    const v = fn(x, Math.sin, Math.cos, Math.tan, Math.exp, Math.log,
+      v => Math.log(v)/Math.LN10, Math.sqrt, Math.PI, Math.E, Math.abs);
+    return isFinite(v) ? v : null;
+  } catch { return null; }
+}
+
+function fprime(expr, x) {
+  const h = 1e-6;
+  const a = evalF(expr, x+h), b = evalF(expr, x-h);
+  if (a===null || b===null) return null;
+  return (a - b) / (2*h);
+}
+
+/* ── BISECTION ── */
+function bisection(expr, a, b, tol, mi) {
+  let fa = evalF(expr, a), fb = evalF(expr, b);
+  if (fa===null || fb===null) return {error:'Cannot evaluate f at endpoints'};
+  if (fa*fb >= 0) return {error:'f(a) and f(b) must have opposite signs'};
+  const res = [];
+  for (let i=0; i<mi; i++) {
+    const c = (a+b)/2, fc = evalF(expr,c), err = Math.abs(b-a)/2;
+    res.push({n:i+1, xi:c, fxi:fc, error:err});
+    if (Math.abs(fc)<tol || err<tol) break;
+    if (fa*fc < 0) { b=c; fb=fc; } else { a=c; fa=fc; }
+  }
+  return {results:res, root:res.at(-1).xi, iters:res.length};
+}
+
+/* ── FALSE POSITION ── */
+function falsePosition(expr, xl, xu, tol, mi) {
+  let fxl = evalF(expr,xl), fxu = evalF(expr,xu);
+  if (fxl===null || fxu===null) return {error:'Cannot evaluate f at endpoints'};
+  if (fxl*fxu >= 0) return {error:'f(a) and f(b) must have opposite signs'};
+  let xr = xl;
+  const res = [];
+  for (let i=0; i<mi; i++) {
+    const xr_old = xr;
+    xr = xu - (fxu*(xl-xu))/(fxl-fxu);
+    const fxr = evalF(expr,xr);
+    const err = i>0 ? Math.abs(xr-xr_old) : Math.abs(xu-xl);
+    res.push({n:i+1, xi:xr, fxi:fxr, error:err});
+    if (Math.abs(fxr)<tol || err<tol) break;
+    if (fxl*fxr < 0) { xu=xr; fxu=fxr; } else { xl=xr; fxl=fxr; }
+  }
+  return {results:res, root:res.at(-1).xi, iters:res.length};
+}
+
+/* ── SECANT ── */
+function secant(expr, x0, x1, tol, mi) {
+  let fx0 = evalF(expr,x0), fx1 = evalF(expr,x1);
+  if (fx0===null || fx1===null) return {error:'Cannot evaluate f at initial points'};
+  const res = [];
+  for (let i=0; i<mi; i++) {
+    if (Math.abs(fx1-fx0) < 1e-12) return {error:'Denominator too small'};
+    const xn = x1 - fx1*(x1-x0)/(fx1-fx0);
+    const err = Math.abs(xn-x1);
+    const fxn = evalF(expr,xn);
+    res.push({n:i+1, xi:xn, fxi:fxn, error:err});
+    if (Math.abs(fxn)<tol || err<tol) break;
+    x0=x1; x1=xn; fx0=fx1; fx1=fxn;
+  }
+  return {results:res, root:res.at(-1).xi, iters:res.length};
+}
+
+/* ── NEWTON-RAPHSON ── */
+function newton(expr, x0, tol, mi) {
+  let x = x0;
+  const res = [];
+  for (let i=0; i<mi; i++) {
+    const fx = evalF(expr,x);
+    if (fx===null) return {error:'f(x) undefined'};
+    const fp = fprime(expr,x);
+    if (fp===null || Math.abs(fp)<1e-12) return {error:'Derivative near zero'};
+    const xn = x - fx/fp;
+    const err = Math.abs(xn-x);
+    const fxn = evalF(expr,xn);
+    res.push({n:i+1, xi:xn, fxi:fxn, error:err});
+    if (Math.abs(fxn)<tol || err<tol) break;
+    x = xn;
+  }
+  return {results:res, root:res.at(-1).xi, iters:res.length};
+}
+
+/* ── THOMAS ALGORITHM ── */
+function thomas(aStr, bStr, cStr, dStr) {
+  try {
+    const a   = aStr.split(',').map(Number);
+    const b   = bStr.split(',').map(Number);
+    const c   = cStr.split(',').map(Number);
+    const rhs = dStr.split(',').map(Number);
+    const n = rhs.length;
+    if (b.length!==n||rhs.length!==n||a.length!==n-1||c.length!==n-1)
+      return {error:`Length mismatch. Need a,c of length ${n-1}; b,d of length ${n}`};
+
+    const y = new Array(n), z = new Array(n), x = new Array(n);
+    y[0] = b[0];
+    for (let i=1; i<n; i++) {
+      y[i] = b[i] - a[i-1]*(c[i-1]/y[i-1]);
+      if (Math.abs(y[i])<1e-14) return {error:`Zero pivot at row ${i+1}`};
+    }
+    z[0] = rhs[0]/y[0];
+    for (let i=1; i<n; i++) z[i] = (rhs[i]-a[i-1]*z[i-1])/y[i];
+    x[n-1] = z[n-1];
+    for (let i=n-2; i>=0; i--) x[i] = z[i]-(c[i]/y[i])*x[i+1];
+
+    const rows = Array.from({length:n},(_,i)=>({i:i+1,y:y[i],z:z[i],x:x[i]}));
+    return {rows, solution:x};
+  } catch(e) { return {error:String(e)}; }
+}
+
+/* ── JACOBI ── */
+function tryMakeDominant(A, b) {
+  // حاول ترتب الصفوف عشان كل صف يبقى diagonally dominant
+  const n = A.length;
+  const usedRows = new Array(n).fill(false);
+  const newA = [], newB = [], permLog = [];
+
+  for (let col = 0; col < n; col++) {
+    // دور على أكبر |A[row][col]| مش اتستخدم لسه
+    let bestRow = -1, bestVal = -Infinity;
+    for (let row = 0; row < n; row++) {
+      if (usedRows[row]) continue;
+      const val = Math.abs(A[row][col]);
+      if (val > bestVal) { bestVal = val; bestRow = row; }
+    }
+    if (bestRow === -1) return null;
+    usedRows[bestRow] = true;
+    newA.push(A[bestRow].slice());
+    newB.push(b[bestRow]);
+    if (bestRow !== col) permLog.push(`Row ${col+1} ← original Row ${bestRow+1}`);
+  }
+
+  // تحقق إن الترتيب الجديد dominant فعلاً
+  for (let i = 0; i < n; i++) {
+    const diag = Math.abs(newA[i][i]);
+    const off  = newA[i].reduce((s,v,j) => j!==i ? s+Math.abs(v) : s, 0);
+    if (diag < off) return null;
+  }
+  return { A: newA, b: newB, permLog };
+}
+
+function jacobi(Astr, bStr, x0Str, tol, mi) {
+  try {
+    let A = Astr.trim().split('\n').filter(r=>r.trim()).map(r=>r.split(',').map(Number));
+    const n = A.length;
+    let b = bStr.split(',').map(Number);
+    const x0s = x0Str.trim();
+    let x = x0s ? x0s.split(',').map(Number) : new Array(n).fill(0);
+
+    // تحقق هل dominant أصلاً
+    let reordered = false;
+    let permLog = [];
+    const isDominant = A.every((row,i) => {
+      const diag = Math.abs(row[i]);
+      const off  = row.reduce((s,v,j) => j!==i ? s+Math.abs(v) : s, 0);
+      return diag >= off;
+    });
+
+    if (!isDominant) {
+      // حاول ترتب أوتوماتيك
+      const result = tryMakeDominant(A, b);
+      if (!result) return {error:'Matrix is not diagonally dominant and cannot be reordered automatically. Please rearrange rows manually.'};
+      A = result.A;
+      b = result.b;
+      permLog = result.permLog;
+      reordered = true;
+    }
+
+    const res = [];
+    for (let k=0; k<mi; k++) {
+      const xNew = new Array(n);
+      for (let i=0; i<n; i++) {
+        const s = A[i].reduce((sum,aij,j)=>j!==i?sum+aij*x[j]:sum, 0);
+        xNew[i] = (b[i]-s)/A[i][i];
+      }
+      const err = Math.max(...xNew.map((v,i)=>Math.abs(v-x[i])));
+      res.push({n:k+1, x:[...xNew], error:err});
+      x = xNew;
+      if (err<tol) break;
+    }
+    return {results:res, solution:x, iters:res.length, reordered, permLog};
+  } catch(e) { return {error:String(e)}; }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   LAB UI
+══════════════════════════════════════════════════════════════════════════ */
+const METHODS = {
+  "Bisection":       { color:"#00d4ff", icon:"◈", needsX1:true,  isSystem:false, x0Label:"a  (left bound)",    x1Label:"b  (right bound)", hint:"Requires f(a)·f(b) < 0  —  bracket the root",          conv:"Linear (order 1)",       bracket:"Yes", deriv:"No",       desc:"Reliable bracketing method. Halves the interval each step." },
+  "False Position":  { color:"#b06aff", icon:"◆", needsX1:true,  isSystem:false, x0Label:"a  (left bound)",    x1Label:"b  (right bound)", hint:"Requires f(a)·f(b) < 0  —  linear interpolation",      conv:"Superlinear",            bracket:"Yes", deriv:"No",       desc:"Uses linear interpolation for a better estimate. Faster than Bisection." },
+  "Secant":          { color:"#00ffcc", icon:"◇", needsX1:true,  isSystem:false, x0Label:"x0  (first guess)",  x1Label:"x1  (second guess)", hint:"Two initial guesses — no sign change required",         conv:"≈1.618 (golden ratio!)", bracket:"No",  deriv:"No",       desc:"Uses two points to approximate the derivative. Fast, no sign change needed." },
+  "Newton-Raphson":  { color:"#ff6b35", icon:"◉", needsX1:false, isSystem:false, x0Label:"x0  (initial guess)",x1Label:"",                  hint:"Single starting point — derivative computed automatically",conv:"Quadratic (order 2)",    bracket:"No",  deriv:"Yes (auto)",desc:"Fastest convergence. Uses tangent lines to approach the root." },
+  "Thomas Algorithm":{ color:"#ff3399", icon:"▣", needsX1:false, isSystem:true,  isThomas:true,               hint:"Tridiagonal matrix solver — O(n) direct method",            conv:"Direct O(n)",            bracket:"N/A", deriv:"N/A",      desc:"Efficient direct solver for tridiagonal systems. Used in PDEs and FEM." },
+  "Jacobi":          { color:"#ffd700", icon:"▦", needsX1:false, isSystem:true,  isJacobi:true,               hint:"Iterative solver — requires diagonally dominant matrix",      conv:"Linear (if dominant)",   bracket:"N/A", deriv:"N/A",      desc:"Iterative solver for linear systems. Converges when matrix is diagonally dominant." }
+};
+
+const SNIPPETS = ["sin(","cos(","tan(","exp(","log(","sqrt(","pi","e","**2","**3"];
+
+let currentMethod = "Bisection";
+let chart1Obj = null, chart2Obj = null, compareChartObj = null;
+let historyData = [];
+let compareData = {};
+
+const CHART_DEFAULTS = {
+  responsive:true, maintainAspectRatio:false,
+  plugins:{ legend:{ labels:{ color:"#4a7aaa", font:{ family:"Share Tech Mono", size:9 } } } },
+  scales:{
+    x:{ ticks:{ color:"#1e2d55", font:{ family:"Share Tech Mono", size:8 } }, grid:{ color:"#1a2550" } },
+    y:{ ticks:{ color:"#1e2d55", font:{ family:"Share Tech Mono", size:8 } }, grid:{ color:"#1a2550" } }
+  }
+};
+
+function initLab() {
+  buildMethodGrid();
+  buildSnippets();
+  buildInfoTab();
+  setMethod("Bisection");
+}
+
+function buildMethodGrid() {
+  const grid = document.getElementById("methodGrid");
+  grid.innerHTML = Object.entries(METHODS).map(([name,cfg]) =>
+    `<button class="method-btn" id="mbtn-${name}" onclick="setMethod('${name}')"
+      style="--method-color:${cfg.color}">
+      <span class="icon">${cfg.icon}</span>${name}
+    </button>`
+  ).join("");
+}
+
+function buildSnippets() {
+  const wrap = document.getElementById("snippets");
+  wrap.innerHTML = SNIPPETS.map(s =>
+    `<button class="snippet-btn" onclick="insertSnippet('${s}')">${s}</button>`
+  ).join("");
+}
+
+function buildInfoTab() {
+  const area = document.getElementById("infoArea");
+  area.innerHTML = Object.entries(METHODS).map(([name,cfg]) => `
+    <div class="info-card fade-in" style="border-color:${cfg.color}22">
+      <div class="info-icon">${cfg.icon}</div>
+      <div class="info-name" style="color:${cfg.color}">${name}</div>
+      <div class="info-type">${cfg.conv}</div>
+      <div class="info-badge" style="background:${cfg.color}22;color:${cfg.color}">
+        ${cfg.bracket!=="N/A"?(cfg.bracket==="Yes"?"BRACKETING":"OPEN"):"LINEAR SYSTEM"}
+      </div>
+      <div class="info-row"><span>Convergence</span><span>${cfg.conv}</span></div>
+      <div class="info-row"><span>Bracketing</span><span>${cfg.bracket}</span></div>
+      <div class="info-row"><span>Derivative</span><span>${cfg.deriv}</span></div>
+      <p style="font-size:10px;color:var(--dim2);margin-top:10px;line-height:1.6">${cfg.desc}</p>
+    </div>`
+  ).join("");
+}
+
+function setMethod(name) {
+  currentMethod = name;
+  const cfg = METHODS[name];
+  document.querySelectorAll(".method-btn").forEach(b => b.classList.remove("active"));
+  document.getElementById(`mbtn-${name}`)?.classList.add("active");
+  document.getElementById("methodHint").textContent = cfg.hint;
+  document.getElementById("methodHint").style.borderLeftColor = cfg.color;
+  document.getElementById("eqCard").style.display = cfg.isSystem ? "none" : "block";
+  document.getElementById("calcBtn").style.background = cfg.color;
+  document.getElementById("calcBtn").style.setProperty("--method-color-val", cfg.color);
+  buildParams(cfg);
+  clearTableAndResult();
+  drawBlankCharts();
+}
+
+function buildParams(cfg) {
+  const area = document.getElementById("paramsArea");
+  if (cfg.isThomas) {
+    area.innerHTML = `
+      <div class="input-group">
+        <label class="input-label">SUB-DIAGONAL a (n-1 values)</label>
+        <input class="input-field" id="thomas_a" value="2,1,1">
+      </div>
+      <div class="input-group">
+        <label class="input-label">MAIN DIAGONAL b (n values)</label>
+        <input class="input-field" id="thomas_b" value="1,10,8,-6">
+      </div>
+      <div class="input-group">
+        <label class="input-label">SUPER-DIAGONAL c (n-1 values)</label>
+        <input class="input-field" id="thomas_c" value="4,-4,-1">
+      </div>
+      <div class="input-group">
+        <label class="input-label">RHS VECTOR d (n values)</label>
+        <input class="input-field" id="thomas_d" value="10,7,6,4">
+      </div>`;
+  } else if (cfg.isJacobi) {
+    area.innerHTML = `
+      <div class="input-group">
+        <label class="input-label">MATRIX A (each row on new line)</label>
+        <textarea class="input-field" id="jacobi_A">10,-1,2,0
+-1,11,-1,3
+2,-1,10,-1
+0,3,-1,8</textarea>
+      </div>
+      <div class="input-group">
+        <label class="input-label">VECTOR b</label>
+        <input class="input-field" id="jacobi_b" value="6,25,-11,15">
+      </div>
+      <div class="input-group">
+        <label class="input-label">INITIAL GUESS x0 (or leave blank for zeros)</label>
+        <input class="input-field" id="jacobi_x0" value="0,0,0,0">
+      </div>
+      <button class="btn-sm" style="width:auto;padding:6px 14px;margin-top:4px;border-color:#34d399;color:#34d399"
+        onclick="checkDominance()">✓ CHECK DIAGONAL DOMINANCE</button>`;
+  } else {
+    area.innerHTML = `
+      <div class="input-group">
+        <label class="input-label">${cfg.x0Label.toUpperCase()}</label>
+        <input class="input-field normal" id="x0" value="2">
+      </div>
+      ${cfg.needsX1 ? `
+      <div class="input-group">
+        <label class="input-label">${cfg.x1Label.toUpperCase()}</label>
+        <input class="input-field normal" id="x1" value="3">
+      </div>` : `
+      <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--dim2);padding:6px 0">
+        Derivative computed via finite differences
+      </div>`}`;
+  }
+}
+
+/* ── CALCULATE ── */
+function calculate() {
+  const cfg = METHODS[currentMethod];
+  const btn = document.getElementById("calcBtn");
+  btn.textContent = "CALCULATING...";
+  btn.classList.add("calculating");
+  hideError(); hideResult();
+
+  const tol = parseFloat(document.getElementById("tol").value) || 1e-6;
+  const mi  = parseInt(document.getElementById("maxiter").value)  || 100;
+
+  let data;
+  if (cfg.isThomas) {
+    data = thomas(
+      document.getElementById("thomas_a").value,
+      document.getElementById("thomas_b").value,
+      document.getElementById("thomas_c").value,
+      document.getElementById("thomas_d").value
+    );
+  } else if (cfg.isJacobi) {
+    data = jacobi(
+      document.getElementById("jacobi_A").value,
+      document.getElementById("jacobi_b").value,
+      document.getElementById("jacobi_x0").value,
+      tol, mi
+    );
+  } else {
+    const expr = document.getElementById("equation").value;
+    const x0   = parseFloat(document.getElementById("x0").value);
+    const x1   = cfg.needsX1 ? parseFloat(document.getElementById("x1").value) : null;
+
+    if (currentMethod === "Bisection")      data = bisection(expr, x0, x1, tol, mi);
+    else if (currentMethod === "False Position") data = falsePosition(expr, x0, x1, tol, mi);
+    else if (currentMethod === "Secant")    data = secant(expr, x0, x1, tol, mi);
+    else if (currentMethod === "Newton-Raphson") data = newton(expr, x0, tol, mi);
+  }
+
+  btn.textContent = "▶ CALCULATE";
+  btn.classList.remove("calculating");
+
+  if (data.error) { showError(data.error); return; }
+  switchTab("chart");
+  renderResults(data, cfg);
+  addToHistory(data, cfg);
+}
+
+function renderResults(data, cfg) {
+  const d = parseInt(document.getElementById("decimals").value) || 6;
+  const tbody = document.getElementById("tableBody");
+  const thead = document.getElementById("tableHead");
+  tbody.innerHTML = "";
+
+  if (cfg.isThomas) {
+    thead.innerHTML = `<tr><th>ROW</th><th>y_i (Step 1)</th><th>z_i (Step 2)</th><th>x_i (Step 3)</th></tr>`;
+    data.rows.forEach((r, i) => {
+      const tr = document.createElement("tr");
+      if (i===data.rows.length-1) tr.className="last-row";
+      tr.innerHTML = `<td>i=${r.i}</td><td>${r.y.toFixed(d)}</td><td>${r.z.toFixed(d)}</td><td>${r.x.toFixed(d)}</td>`;
+      tbody.appendChild(tr);
+    });
+    const sol = data.solution.map((x,i)=>`x${i+1}=${x.toFixed(4)}`).join("  ");
+    showResult("Solution", sol);
+    setStatus(`Thomas  ·  solved  ·  [${sol}]`, "success");
+    drawThomasCharts(data, cfg);
+
+  } else if (cfg.isJacobi) {
+    // لو المصفوفة اترتبت أوتوماتيك — وضح ده للطالب
+    if (data.reordered && data.permLog && data.permLog.length) {
+      const notice = document.createElement("tr");
+      notice.innerHTML = `<td colspan="3" style="text-align:center;padding:8px;font-family:'Share Tech Mono',monospace;font-size:9px;color:#ffd700;background:rgba(255,215,0,0.06);border-bottom:1px solid rgba(255,215,0,0.2)">
+        ⚙ AUTO-REORDERED for diagonal dominance: ${data.permLog.join("  |  ")}
+      </td>`;
+      tbody.appendChild(notice);
+    }
+    thead.innerHTML = `<tr><th>n</th><th>x vector</th><th>max error</th></tr>`;
+    data.results.forEach((r, i) => {
+      const tr = document.createElement("tr");
+      if (i===data.results.length-1) tr.className="last-row";
+      tr.innerHTML = `<td>${r.n}</td><td>${r.x.map(v=>v.toFixed(4)).join("  ")}</td><td>${r.error.toExponential(4)}</td>`;
+      tbody.appendChild(tr);
+    });
+    const sol = data.solution.map((x,i)=>`x${i+1}=${x.toFixed(4)}`).join("  ");
+    showResult("Solution", sol);
+    setStatus(`Jacobi  ·  ${data.iters} iterations  ·  [${sol}]${data.reordered?" · ⚙ reordered":""}`, "success");
+    drawJacobiCharts(data, cfg);
+
+  } else {
+    thead.innerHTML = `<tr><th>n</th><th>x_i</th><th>f(x_i)</th><th>error</th></tr>`;
+    data.results.forEach((r, i) => {
+      const tr = document.createElement("tr");
+      if (i===data.results.length-1) tr.className="last-row";
+      tr.innerHTML = `<td>${r.n}</td><td>${r.xi.toFixed(d)}</td><td>${r.fxi.toFixed(d)}</td><td>${r.error.toExponential(4)}</td>`;
+      tbody.appendChild(tr);
+    });
+    showResult(`Root ≈`, data.root.toFixed(d));
+    setStatus(`${currentMethod}  ·  ${data.iters} iterations  ·  root ≈ ${data.root.toFixed(d)}`, "success");
+    drawRootCharts(data, cfg);
+  }
+
+  window._lastResult = {method: currentMethod, cfg, data};
+}
+
+/* ── CHARTS ── */
+function destroyCharts() {
+  if (chart1Obj) { chart1Obj.destroy(); chart1Obj=null; }
+  if (chart2Obj) { chart2Obj.destroy(); chart2Obj=null; }
+}
+
+function drawBlankCharts() {
+  destroyCharts();
+  document.getElementById("chart1Title").textContent = `FUNCTION  f(x)  —  ${currentMethod}`;
+  document.getElementById("chart2Title").textContent = "CONVERGENCE  (press Calculate)";
+}
+
+/* ── ANIMATION ALWAYS ON ── */
+let animEnabled = true;
+
+function getAnim(dur, easing) {
+  return {
+    duration: dur,
+    easing,
+    x: { duration: dur, easing },
+    y: { duration: dur * 1.2, easing: "easeOutBounce" }
+  };
+}
+
+/* Slide-in animation for chart boxes after calculate */
+function animateChartBoxes() {
+  const boxes = document.querySelectorAll('.chart-box');
+  boxes.forEach((box, i) => {
+    box.style.transition = 'none';
+    box.style.opacity = '0';
+    box.style.transform = 'translateY(18px)';
+    setTimeout(() => {
+      box.style.transition = `opacity 0.5s ease ${i * 0.18}s, transform 0.5s cubic-bezier(.22,1.2,.6,1) ${i * 0.18}s`;
+      box.style.opacity = '1';
+      box.style.transform = 'translateY(0)';
+    }, 30);
+  });
+}
+
+/* ── ZERO LINE PLUGIN (register once) ── */
+let zeroLineRegistered = false;
+function registerZeroLine() {
+  if (zeroLineRegistered) return;
+  zeroLineRegistered = true;
+  Chart.register({
+    id: 'zeroLine',
+    afterDraw(chart) {
+      if (chart.canvas.id !== 'chart1') return;
+      const { ctx, chartArea, scales } = chart;
+      if (!scales.y) return;
+      const y0 = scales.y.getPixelForValue(0);
+      if (y0 < chartArea.top || y0 > chartArea.bottom) return;
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(chartArea.left, y0);
+      ctx.lineTo(chartArea.right, y0);
+      ctx.strokeStyle = '#ffffff28';
+      ctx.lineWidth = 1;
+      ctx.setLineDash([5, 5]);
+      ctx.stroke();
+      ctx.restore();
+    }
+  });
+}
+
+/* ═══════════════════════════════════════════
+   REAL DRAW ANIMATION — نقطة نقطة
+   ═══════════════════════════════════════════ */
+
+// Plugin بيرسم "قلم" بيتحرك عند آخر نقطة
+const drawingCursorPlugin = {
+  id: 'drawingCursor',
+  afterDraw(chart) {
+    const prog = chart._drawProgress;
+    if (prog === undefined || prog >= 1) return;
+    const ds = chart.data.datasets[0];
+    if (!ds || !ds.data) return;
+    const meta = chart.getDatasetMeta(0);
+    if (!meta || !meta.data) return;
+
+    // إيجاد آخر نقطة مرسومة
+    const lastIdx = Math.floor(prog * (ds.data.length - 1));
+    const pt = meta.data[lastIdx];
+    if (!pt) return;
+
+    const { ctx } = chart;
+    // دائرة "القلم" عند نهاية الخط
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(pt.x, pt.y, 5, 0, Math.PI * 2);
+    ctx.fillStyle = chart._drawColor || '#00d4ff';
+    ctx.shadowBlur = 12;
+    ctx.shadowColor = chart._drawColor || '#00d4ff';
+    ctx.fill();
+    ctx.restore();
+  }
+};
+Chart.register(drawingCursorPlugin);
+
+/**
+ * animateLineChart — يبني البيانات تدريجياً نقطة نقطة
+ * @param {Chart} chart - الـ chart object
+ * @param {Array} fullData - البيانات الكاملة
+ * @param {number} duration - مدة الـ animation بالمللي ثانية
+ * @param {string} color - لون القلم
+ */
+function animateLineChart(chart, fullData, duration = 1200, color = '#00d4ff') {
+  chart._drawColor = color;
+  const total = fullData.length;
+  const start = performance.now();
+
+  function frame(now) {
+    const elapsed = now - start;
+    const raw = elapsed / duration;
+    // easeInOutCubic
+    const t = raw < 0.5 ? 4 * raw * raw * raw : 1 - Math.pow(-2 * raw + 2, 3) / 2;
+    const progress = Math.min(t, 1);
+    chart._drawProgress = progress;
+
+    const count = Math.max(2, Math.ceil(progress * total));
+    chart.data.datasets[0].data = fullData.slice(0, count);
+    chart.update('none'); // بدون animation داخلي
+
+    if (progress < 1) {
+      requestAnimationFrame(frame);
+    } else {
+      // في النهاية حط كل البيانات ومسح الـ cursor
+      chart._drawProgress = 1;
+      chart.data.datasets[0].data = fullData;
+      chart.update('none');
+    }
+  }
+  requestAnimationFrame(frame);
+}
+
+/**
+ * animateBarChart — الـ bars بتطلع من الأسفل واحدة بعد واحدة
+ */
+function animateBarChart(chart, fullData, duration = 900, color = '#00d4ff') {
+  const total = fullData.length;
+  // ابدأ بـ zeros
+  chart.data.datasets[0].data = new Array(total).fill(0);
+  chart.update('none');
+
+  const start = performance.now();
+  function frame(now) {
+    const elapsed = now - start;
+    const t = Math.min(elapsed / duration, 1);
+    // easeOutCubic
+    const ease = 1 - Math.pow(1 - t, 3);
+
+    const newData = fullData.map(v => v * ease);
+    chart.data.datasets[0].data = newData;
+    chart.update('none');
+
+    if (t < 1) requestAnimationFrame(frame);
+    else {
+      chart.data.datasets[0].data = fullData;
+      chart.update('none');
+    }
+  }
+  requestAnimationFrame(frame);
+}
+
+/**
+ * animateMultiLine — لخطين (Thomas chart2)
+ */
+function animateMultiLine(chart, fullDatasets, duration = 1100) {
+  const total = fullDatasets[0].length;
+  const start = performance.now();
+
+  function frame(now) {
+    const elapsed = now - start;
+    const raw = Math.min(elapsed / duration, 1);
+    const t = raw < 0.5 ? 4*raw*raw*raw : 1 - Math.pow(-2*raw+2,3)/2;
+    const count = Math.max(2, Math.ceil(t * total));
+
+    fullDatasets.forEach((fd, i) => {
+      chart.data.datasets[i].data = fd.slice(0, count);
+    });
+    chart.update('none');
+
+    if (raw < 1) requestAnimationFrame(frame);
+    else {
+      fullDatasets.forEach((fd, i) => { chart.data.datasets[i].data = fd; });
+      chart.update('none');
+    }
+  }
+  requestAnimationFrame(frame);
+}
+
+function drawRootCharts(data, cfg) {
+  destroyCharts();
+  registerZeroLine();
+  animateChartBoxes();
+  document.getElementById("chart1Title").textContent = `f(x)  —  ${currentMethod}`;
+  document.getElementById("chart2Title").textContent = "CONVERGENCE RATE  (log scale)";
+
+  // Build smooth f(x) curve
+  const xs = data.results.map(r => r.xi);
+  const span = Math.max(Math.max(...xs) - Math.min(...xs), 1);
+  const minX = Math.min(...xs) - span * 0.4;
+  const maxX = Math.max(...xs) + span * 0.4;
+  const steps = 100;
+  const curveLabels = [], curveY = [];
+  const expr = document.getElementById("equation")?.value || "";
+  for (let i = 0; i <= steps; i++) {
+    const xv = minX + (maxX - minX) * i / steps;
+    curveLabels.push(xv.toFixed(5));
+    curveY.push(evalF(expr, xv));
+  }
+
+  function nearestY(targetX) {
+    let best = null, bestDist = Infinity;
+    for (let i = 0; i <= steps; i++) {
+      const xv = minX + (maxX - minX) * i / steps;
+      const d = Math.abs(xv - targetX);
+      if (d < bestDist) { bestDist = d; best = i; }
+    }
+    return best;
+  }
+
+  const iterDataset = new Array(steps + 1).fill(null);
+  data.results.slice(0, -1).forEach(r => {
+    const idx = nearestY(r.xi);
+    if (idx !== null) iterDataset[idx] = r.fxi;
+  });
+
+  const starDataset = new Array(steps + 1).fill(null);
+  const rootIdx = nearestY(data.root);
+  if (rootIdx !== null) starDataset[rootIdx] = data.results.at(-1).fxi;
+
+  // أنشئ الـ chart بـ data فاضية
+  chart1Obj = new Chart(document.getElementById("chart1"), {
+    type: "line",
+    data: {
+      labels: curveLabels,
+      datasets: [
+        {
+          label: "f(x)",
+          data: [],  // هيتملى بالـ animation
+          borderColor: cfg.color,
+          backgroundColor: cfg.color + "18",
+          borderWidth: 2.5,
+          pointRadius: 0,
+          fill: true,
+          tension: 0.4,
+          order: 3
+        },
+        {
+          label: "Iterations",
+          data: iterDataset,
+          borderColor: "transparent",
+          backgroundColor: cfg.color + "dd",
+          pointRadius: 6,
+          pointHoverRadius: 9,
+          pointStyle: "circle",
+          showLine: false,
+          spanGaps: false,
+          order: 2
+        },
+        {
+          label: `Root ≈ ${data.root.toFixed(6)}`,
+          data: starDataset,
+          borderColor: "transparent",
+          backgroundColor: "#ffffff",
+          pointRadius: 12,
+          pointHoverRadius: 15,
+          pointStyle: "star",
+          pointBorderColor: cfg.color,
+          pointBorderWidth: 2.5,
+          showLine: false,
+          spanGaps: false,
+          order: 1
+        }
+      ]
+    },
+    options: {
+      ...CHART_DEFAULTS,
+      animation: false,
+      plugins: {
+        ...CHART_DEFAULTS.plugins,
+        tooltip: {
+          callbacks: {
+            label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y?.toFixed(6) ?? ""}`
+          }
+        }
+      }
+    }
+  });
+
+  // ابدأ الـ animation بعد ما الـ chart يترسم
+  setTimeout(() => animateLineChart(chart1Obj, curveY, 1400, cfg.color), 100);
+
+  // chart 2 — convergence
+  const errData = data.results.map(r => Math.max(r.error, 1e-16));
+  chart2Obj = new Chart(document.getElementById("chart2"), {
+    type: "line",
+    data: {
+      labels: data.results.map(r => r.n),
+      datasets: [{
+        label: "Error",
+        data: [],
+        borderColor: cfg.color,
+        backgroundColor: cfg.color + "22",
+        borderWidth: 2.5,
+        pointRadius: 5,
+        pointBackgroundColor: "#01020a",
+        pointBorderColor: cfg.color,
+        pointBorderWidth: 2,
+        pointHoverRadius: 8,
+        fill: true,
+        tension: 0.3
+      }]
+    },
+    options: {
+      ...CHART_DEFAULTS,
+      animation: false,
+      scales: {
+        ...CHART_DEFAULTS.scales,
+        y: { ...CHART_DEFAULTS.scales.y, type: "logarithmic" }
+      }
+    }
+  });
+
+  setTimeout(() => animateLineChart(chart2Obj, errData, 1600, cfg.color), 400);
+}
+
+function drawThomasCharts(data, cfg) {
+  destroyCharts();
+  animateChartBoxes();
+  document.getElementById("chart1Title").textContent = "THOMAS  —  SOLUTION VECTOR";
+  document.getElementById("chart2Title").textContent = "FORWARD SWEEP  y  &  z";
+
+  chart1Obj = new Chart(document.getElementById("chart1"), {
+    type:"bar",
+    data:{ labels:data.solution.map((_,i)=>`x${i+1}`),
+      datasets:[{ label:"Solution x", data: new Array(data.solution.length).fill(0),
+        backgroundColor:cfg.color+"88", borderColor:cfg.color, borderWidth:2,
+        borderRadius: 8, borderSkipped: false }]
+    },
+    options:{ ...CHART_DEFAULTS, animation: false }
+  });
+
+  setTimeout(() => animateBarChart(chart1Obj, data.solution, 1000, cfg.color), 100);
+
+  const yData = data.rows.map(r=>r.y);
+  const zData = data.rows.map(r=>r.z);
+  const labels = data.rows.map(r=>`i=${r.i}`);
+
+  chart2Obj = new Chart(document.getElementById("chart2"), {
+    type:"line",
+    data:{ labels,
+      datasets:[
+        { label:"y (Step 1)", data:[], borderColor:"#00ffcc", pointBackgroundColor:"#01020a", borderWidth:2.5, pointRadius:4, tension:0.3 },
+        { label:"z (Step 2)", data:[], borderColor:"#b06aff", pointBackgroundColor:"#01020a", borderWidth:2.5, pointRadius:4, tension:0.3 }
+      ]
+    },
+    options:{ ...CHART_DEFAULTS, animation: false }
+  });
+
+  setTimeout(() => animateMultiLine(chart2Obj, [yData, zData], 1200), 300);
+}
+
+function drawJacobiCharts(data, cfg) {
+  destroyCharts();
+  animateChartBoxes();
+  document.getElementById("chart1Title").textContent = "JACOBI  —  FINAL SOLUTION";
+  document.getElementById("chart2Title").textContent = "CONVERGENCE  (log scale)";
+
+  chart1Obj = new Chart(document.getElementById("chart1"), {
+    type:"bar",
+    data:{ labels:data.solution.map((_,i)=>`x${i+1}`),
+      datasets:[{ label:"Solution", data: new Array(data.solution.length).fill(0),
+        backgroundColor:cfg.color+"88", borderColor:cfg.color, borderWidth:2,
+        borderRadius: 8, borderSkipped: false }]
+    },
+    options:{ ...CHART_DEFAULTS, animation: false }
+  });
+
+  setTimeout(() => animateBarChart(chart1Obj, data.solution, 1000, cfg.color), 100);
+
+  const errData = data.results.map(r=>Math.max(r.error,1e-16));
+  chart2Obj = new Chart(document.getElementById("chart2"), {
+    type:"line",
+    data:{ labels:data.results.map(r=>r.n),
+      datasets:[{ label:"Max Error", data:[],
+        borderColor:cfg.color, backgroundColor:cfg.color+"22",
+        borderWidth:2.5, pointRadius:4, fill:true, tension:0.3,
+        pointBackgroundColor:"#01020a", pointBorderColor:cfg.color }]
+    },
+    options:{ ...CHART_DEFAULTS, animation: false,
+      scales:{ ...CHART_DEFAULTS.scales, y:{ ...CHART_DEFAULTS.scales.y, type:"logarithmic" } }
+    }
+  });
+
+  setTimeout(() => animateLineChart(chart2Obj, errData, 1400, cfg.color), 300);
+}
+
+/* ── HISTORY ── */
+function addToHistory(data, cfg) {
+  const time = new Date().toLocaleTimeString();
+  historyData.unshift({method:currentMethod, cfg, data, time});
+  renderHistory();
+}
+
+function renderHistory() {
+  const area = document.getElementById("historyArea");
+  if (!historyData.length) {
+    area.innerHTML = `<div class="history-empty">No calculations yet.</div>`;
+    return;
+  }
+  area.innerHTML = historyData.map((e,i) => {
+    const root = e.data.root!==undefined
+      ? `Root ≈ ${typeof e.data.root==='number'?e.data.root.toFixed(6):e.data.root}`
+      : e.data.solution
+        ? `[${e.data.solution.map(x=>x.toFixed(4)).join(", ")}]`
+        : "—";
+    return `<div class="hist-item fade-in" onclick="replayHistory(${i})">
+      <div class="hist-badge" style="color:${e.cfg.color}">${e.cfg.icon}</div>
+      <div class="hist-info">
+        <div class="hist-method" style="color:${e.cfg.color}">${e.method}</div>
+        <div class="hist-detail">${root}  ·  ${e.data.iters||(e.data.rows?e.data.rows.length:"—")} iterations</div>
+      </div>
+      <div class="hist-time">${e.time}</div>
+    </div>`;
+  }).join("");
+}
+
+function replayHistory(i) {
+  const e = historyData[i];
+  renderResults(e.data, e.cfg);
+  switchTab("chart");
+}
+
+function clearHistoryData() {
+  if (!confirm("Clear all history?")) return;
+  historyData = [];
+  renderHistory();
+}
+
+function saveHistory() {
+  const blob = new Blob([JSON.stringify(historyData, null, 2)], {type:"application/json"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = `numerical_results_${Date.now()}.json`;
+  a.click();
+}
+
+/* ── COMPARE ── */
+function addToCompare() {
+  if (!window._lastResult) { showError("Run a calculation first!"); return; }
+  const {method, cfg, data} = window._lastResult;
+  compareData[method] = {cfg, data};
+  renderCompareTable();
+  switchTab("compare");
+}
+
+function renderCompareTable() {
+  const tbody = document.getElementById("compareBody");
+  if (!Object.keys(compareData).length) {
+    tbody.innerHTML = `<tr><td colspan="4" style="color:var(--dim);padding:20px;text-align:center;font-family:'Share Tech Mono',monospace;font-size:10px">Add methods using ⚖ ADD TO COMPARE</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = Object.entries(compareData).map(([name,{cfg,data}]) => {
+    const root  = data.root!==undefined ? data.root.toFixed(6) : "—";
+    const iters = data.iters||(data.rows?data.rows.length:"—");
+    const err   = data.results ? data.results.at(-1).error.toExponential(4) : "Direct";
+    return `<tr>
+      <td style="color:${cfg.color};font-family:'Share Tech Mono',monospace;font-size:10px">${cfg.icon} ${name}</td>
+      <td>${root}</td><td>${iters}</td><td>${err}</td>
+    </tr>`;
+  }).join("");
+}
+
+function runCompare() {
+  if (Object.keys(compareData).length<2) { showError("Add at least 2 methods to compare!"); return; }
+  if (compareChartObj) { compareChartObj.destroy(); compareChartObj=null; }
+
+  const datasets = Object.entries(compareData).map(([name,{cfg,data}]) => {
+    if (!data.results) return null;
+    return {
+      label:`${cfg.icon} ${name}`,
+      data:data.results.map(r=>Math.max(r.error,1e-16)),
+      borderColor:cfg.color, backgroundColor:"transparent",
+      borderWidth:2, pointRadius:3, pointBackgroundColor:"#01020a",
+      pointBorderColor:cfg.color, pointBackgroundColor:"#01020a"
+    };
+  }).filter(Boolean);
+
+  const maxLen = Math.max(...datasets.map(d=>d.data.length));
+  compareChartObj = new Chart(document.getElementById("compareChart"), {
+    type:"line",
+    data:{ labels:Array.from({length:maxLen},(_,i)=>i+1), datasets },
+    options:{ ...CHART_DEFAULTS, maintainAspectRatio:false,
+      scales:{ ...CHART_DEFAULTS.scales, y:{ ...CHART_DEFAULTS.scales.y, type:"logarithmic" } } }
+  });
+}
+
+function clearCompare() {
+  compareData = {};
+  renderCompareTable();
+  if (compareChartObj) { compareChartObj.destroy(); compareChartObj=null; }
+}
+
+/* ── JACOBI CHECK ── */
+function checkDominance() {
+  const A = document.getElementById("jacobi_A").value.trim().split("\n")
+    .map(row=>row.split(",").map(Number));
+  const n = A.length;
+  let dominant = true;
+  for (let i=0; i<n; i++) {
+    const diag = Math.abs(A[i][i]);
+    const off  = A[i].reduce((s,v,j)=>j!==i?s+Math.abs(v):s, 0);
+    if (diag<off) { dominant=false; break; }
+  }
+  if (dominant) {
+    showResult("✓ Check Passed", "Matrix IS diagonally dominant — ready!");
+    document.getElementById("resultBox").style.borderColor = "var(--green)";
+    document.getElementById("resultBox").style.color = "var(--green)";
+  } else {
+    showError("✗ Matrix is NOT diagonally dominant. Rearrange rows.");
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   STEP-BY-STEP MODE
+══════════════════════════════════════════════════════════════════════════ */
+let stepData = null;
+let stepIndex = 0;
+
+function calculateStepByStep() {
+  const cfg = METHODS[currentMethod];
+  const tol = parseFloat(document.getElementById("tol").value) || 1e-6;
+  const mi  = parseInt(document.getElementById("maxiter").value) || 100;
+
+  let data;
+  if (cfg.isThomas) {
+    data = thomas(
+      document.getElementById("thomas_a").value,
+      document.getElementById("thomas_b").value,
+      document.getElementById("thomas_c").value,
+      document.getElementById("thomas_d").value
+    );
+  } else if (cfg.isJacobi) {
+    data = jacobi(
+      document.getElementById("jacobi_A").value,
+      document.getElementById("jacobi_b").value,
+      document.getElementById("jacobi_x0").value,
+      tol, mi
+    );
+  } else {
+    const expr = document.getElementById("equation").value;
+    const x0   = parseFloat(document.getElementById("x0").value);
+    const x1   = cfg.needsX1 ? parseFloat(document.getElementById("x1").value) : null;
+    if (currentMethod === "Bisection")           data = bisection(expr, x0, x1, tol, mi);
+    else if (currentMethod === "False Position") data = falsePosition(expr, x0, x1, tol, mi);
+    else if (currentMethod === "Secant")         data = secant(expr, x0, x1, tol, mi);
+    else if (currentMethod === "Newton-Raphson") data = newton(expr, x0, tol, mi);
+  }
+
+  if (!data || data.error) { showError(data?.error || "Calculation failed"); return; }
+
+  stepData = data;
+  stepIndex = 0;
+
+  renderResults(data, cfg);
+  addToHistory(data, cfg);
+
+  document.getElementById("stepControls").style.display = "block";
+  highlightStep(0);
+}
+
+function highlightStep(idx) {
+  if (!stepData) return;
+
+  const rows    = document.querySelectorAll("#tableBody tr");
+  const isThomas = METHODS[currentMethod].isThomas;
+  const isJacobi = METHODS[currentMethod].isJacobi;
+  const results  = stepData.results || stepData.rows || [];
+  const total    = results.length;
+
+  rows.forEach((r, i) => {
+    r.style.opacity    = i === idx ? "1" : "0.2";
+    r.style.background = i === idx ? "rgba(0,255,204,0.08)" : "";
+    r.style.boxShadow  = i === idx ? "inset 3px 0 0 #00ffcc" : "";
+    r.style.transition = "all 0.25s";
+  });
+
+  document.getElementById("stepCounter").textContent = "STEP  " + (idx + 1) + "  /  " + total;
+
+  const r = results[idx];
+  let explain = "";
+
+  if (isThomas) {
+    explain = "Row " + r.i + ":  y = " + r.y.toFixed(6) + "  →  z = " + r.z.toFixed(6) + "  →  x = " + r.x.toFixed(6);
+  } else if (isJacobi) {
+    const vec = r.x.map(function(v,i){ return "x"+(i+1)+"="+v.toFixed(5); }).join("  ");
+    explain = "Iteration " + r.n + ":  [" + vec + "]\nMax error = " + r.error.toExponential(4) + (r.error < 1e-4 ? "  ✓ Converging fast!" : "");
+  } else {
+    const notes = {
+      "Bisection":      "Midpoint c = (a+b)/2 = " + r.xi.toFixed(6),
+      "False Position": "Linear interpolation → xr = " + r.xi.toFixed(6),
+      "Secant":         "Secant line intersection → x = " + r.xi.toFixed(6),
+      "Newton-Raphson": "Tangent line → x = " + r.xi.toFixed(6)
+    };
+    explain = "Iteration " + r.n + ":  " + (notes[currentMethod] || "x = " + r.xi.toFixed(6)) + "\n" +
+              "f(x) = " + (r.fxi !== null ? r.fxi.toFixed(8) : "N/A") + "\n" +
+              "Error = " + r.error.toExponential(4) + (r.error < 1e-4 ? "  ✓ Near convergence!" : "  ⏳ Still iterating...");
+  }
+
+  const expEl = document.getElementById("stepExplain");
+  expEl.style.whiteSpace = "pre-line";
+  expEl.textContent = explain;
+
+  rows[idx] && rows[idx].scrollIntoView({ block: "nearest", behavior: "smooth" });
+  updateChartToStep(idx);
+}
+
+function stepNext() {
+  if (!stepData) return;
+  const total = (stepData.results || stepData.rows || []).length;
+  if (stepIndex < total - 1) { stepIndex++; highlightStep(stepIndex); }
+}
+
+function stepPrev() {
+  if (!stepData) return;
+  if (stepIndex > 0) { stepIndex--; highlightStep(stepIndex); }
+}
+
+function updateChartToStep(idx) {
+  if (!chart2Obj || !stepData) return;
+  const results = stepData.results || [];
+  if (!results.length) return;
+  const slice = results.slice(0, idx + 1).map(function(r){ return Math.max(r.error, 1e-16); });
+  chart2Obj.data.datasets[0].data = slice;
+  chart2Obj.data.labels = results.slice(0, idx + 1).map(function(r){ return r.n; });
+  chart2Obj.update('none');
+}
+
+
+
+
+/* ── UI HELPERS ── */
+function switchTab(name) {
+  document.querySelectorAll(".tab").forEach((t,i) => {
+    const names = ["chart","history","compare","info"];
+    t.classList.toggle("active", names[i]===name);
+  });
+  document.querySelectorAll(".tab-content").forEach(c=>c.classList.remove("active"));
+  document.getElementById(`tab-${name}`).classList.add("active");
+}
+
+function insertSnippet(s) {
+  const inp = document.getElementById("equation");
+  const pos = inp.selectionStart;
+  inp.value = inp.value.slice(0,pos)+s+inp.value.slice(pos);
+  inp.focus();
+  inp.selectionStart = inp.selectionEnd = pos+s.length;
+}
+
+function clearAll() {
+  document.getElementById("equation").value = "x**3 - 2*x - 5";
+  clearTableAndResult();
+  setStatus("Ready");
+  setMethod(currentMethod);
+}
+
+function clearTableAndResult() {
+  document.getElementById("tableHead").innerHTML = "";
+  document.getElementById("tableBody").innerHTML = "";
+  hideError(); hideResult(); destroyCharts();
+}
+
+function setStatus(msg, cls) {
+  const bar = document.getElementById("statusBar");
+  if (!bar) return;
+  bar.textContent = msg;
+  bar.className = "status-bar" + (cls ? " " + cls : "");
+}
+
+function showError(msg) {
+  const b = document.getElementById("errorBox");
+  b.textContent = "✕  "+msg; b.classList.add("show");
+  document.getElementById("resultBox").classList.remove("show");
+  setStatus(msg,"error-msg");
+}
+function hideError() { document.getElementById("errorBox").classList.remove("show"); }
+
+function showResult(label, val) {
+  const b = document.getElementById("resultBox");
+  b.innerHTML = `<div class="r-label">${label}</div><div class="r-val">${val}</div>`;
+  b.classList.add("show");
+  b.style.borderColor="var(--border)"; b.style.color="var(--text)";
+}
+function hideResult() { document.getElementById("resultBox").classList.remove("show"); }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   SHOOTING STARS GENERATOR
+══════════════════════════════════════════════════════════════════════════ */
+(function() {
+  const container = document.getElementById('shootingStars');
+  function createStar() {
+    const star = document.createElement('div');
+    star.className = 'shooting-star';
+    const startX = Math.random() * 100;
+    const startY = Math.random() * 40;
+    const angle = 20 + Math.random() * 30;
+    const distance = 200 + Math.random() * 300;
+    const tx = Math.cos(angle * Math.PI / 180) * distance;
+    const ty = Math.sin(angle * Math.PI / 180) * distance;
+    const duration = 1.5 + Math.random() * 2;
+    star.style.cssText = `
+      left:${startX}vw; top:${startY}vh;
+      --angle:${angle}deg; --tx:${tx}px; --ty:${ty}px;
+      animation-duration:${duration}s;
+      opacity:0;
+    `;
+    container.appendChild(star);
+    setTimeout(() => star.remove(), duration * 1000 + 100);
+  }
+  // Launch stars periodically
+  setInterval(() => {
+    if (Math.random() > 0.3) createStar();
+  }, 800);
+  // Burst on start
+  for (let i = 0; i < 3; i++) setTimeout(createStar, i * 400);
+})();
+</script>
+</body>
+</html>
